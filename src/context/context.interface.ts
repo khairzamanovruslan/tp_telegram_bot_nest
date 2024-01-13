@@ -1,9 +1,12 @@
-import { createSubstationSchema, typeHadlersSubstation } from '../types/types';
+import { substationMode, typeHadlersSubstation } from '../types/types';
 import { Context as ContextTelegraf } from 'telegraf';
 
 export interface Context extends ContextTelegraf {
   session: {
     type?: typeHadlersSubstation;
-    createSubstation: createSubstationSchema;
+    substationName?: string;
+    substationCoordinates?: string;
+    substationLink?: string;
+    substationType: substationMode;
   };
 }

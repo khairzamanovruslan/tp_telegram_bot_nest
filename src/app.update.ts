@@ -10,10 +10,9 @@ import {
 } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
 import { actionButtons } from './app.buttons';
-import { typeHadlersSubstation } from './types/types';
+import { typeHadlersSubstation, substationModeValue } from './types/types';
 import { Context } from './context/context.interface';
 import { substationUtils } from './app.utils';
-import { createSubstationModeValue } from './types/types';
 
 @Update()
 export class AppUpdate {
@@ -56,9 +55,9 @@ export class AppUpdate {
     await ctx.deleteMessage();
     await ctx.reply('Добавить ТП\nВведите номер ТП: ');
     ctx.session.type = typeHadlersSubstation.CREATE;
-    ctx.session.createSubstation.type = createSubstationModeValue.NAME;
-    ctx.session.createSubstation.name = '';
-    ctx.session.createSubstation.coordinates = '';
+    ctx.session.substationType = substationModeValue.NAME;
+    ctx.session.substationName = '';
+    ctx.session.substationCoordinates = '';
   }
 
   @On('text')
@@ -67,8 +66,7 @@ export class AppUpdate {
     await ctx.reply(`session: ${ctx.session.type}`);
     if (!ctx.session.type) return;
     if (ctx.session.type === typeHadlersSubstation.SEARCH) {
-      const { list, coordinates } = substationUtils();
-      const data = await this.appService.getSearchByName(message);
+      const data = await this.appService.searchByName(message);
       if (!data.length) {
         await ctx.deleteMessage();
         await ctx.reply(
@@ -76,12 +74,7 @@ export class AppUpdate {
         );
         return;
       }
-      await ctx.reply(
-        `Поиск ТП\nПо запросу: ${message}\n\nСписок ТП:\n${list(data)}`,
-      );
-      coordinates(data).forEach(async (item) => {
-        await ctx.reply(item);
-      });
+      await ctx.reply(data[0].coordinates);
       ctx.session.type = typeHadlersSubstation.DEFAULT;
       return;
     }
@@ -111,25 +104,36 @@ export class AppUpdate {
     }
 
     if (ctx.session.type === typeHadlersSubstation.CREATE) {
-      const createSubstation = ctx.session.createSubstation.type;
-      if (createSubstation === createSubstationModeValue.NAME) {
-        console.log(createSubstationModeValue.NAME);
-        ctx.session.createSubstation.name = message;
-        ctx.session.createSubstation.type =
-          createSubstationModeValue.COORDINATES;
+      const data = await this.appService.searchByName(message);
+      if (data.length > 0) {
+        console.log('searchByName', data);
         await ctx.reply(
-          `Добавить ТП\nНомер ТП: ${ctx.session.createSubstation.name}\nВведите координаты ТП:`,
+          `Добавить ТП\nВнимание!\nНомер ТП: ${ctx.session.substationName} - уже существует!\nВведите уникальный номер ТП: `,
         );
         return;
       }
-      if (createSubstation === createSubstationModeValue.COORDINATES) {
-        ctx.session.createSubstation.coordinates = message;
-        let name = ctx.session.createSubstation.name;
-        let coordinates = ctx.session.createSubstation.coordinates;
+
+      const createSubstation = ctx.session.substationType;
+      if (createSubstation === substationModeValue.NAME) {
+        console.log(substationModeValue.NAME);
+        ctx.session.substationName = message;
+        ctx.session.substationType = substationModeValue.COORDINATES;
+        await ctx.reply(
+          `Добавить ТП\nНомер ТП: ${ctx.session.substationName}\nВведите координаты ТП:`,
+        );
+        return;
+      }
+      if (createSubstation === substationModeValue.COORDINATES) {
+        ctx.session.substationCoordinates = message;
+        let name = ctx.session.substationName;
+        let coordinates = ctx.session.substationCoordinates
+          .trim()
+          .split(' ')
+          .join('');
         const data = await this.appService.createTp(name, coordinates);
         name = '';
         coordinates = '';
-        ctx.session.createSubstation.type = createSubstationModeValue.DEFAULT;
+        ctx.session.substationType = substationModeValue.DEFAULT;
         ctx.session.type = typeHadlersSubstation.DEFAULT;
         await ctx.reply(
           `Добавить ТП\nДанные записаны!\n\nНомер ТП: ${data.name}\nКоординаты ТП: ${data.coordinates}`,

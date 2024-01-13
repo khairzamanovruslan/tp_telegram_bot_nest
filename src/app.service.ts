@@ -12,7 +12,7 @@ export class AppService {
   async getAll() {
     return this.substationRepository.findAll();
   }
-  async getSearchByName(propName: string) {
+  async searchByName(propName: string) {
     return this.substationRepository.findAll({
       raw: true,
       where: { name: { [Op.eq]: propName } },

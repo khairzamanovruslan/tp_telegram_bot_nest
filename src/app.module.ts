@@ -4,7 +4,6 @@ import * as LocalSession from 'telegraf-session-local';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Substation } from './app.model';
-import * as path from 'path';
 import { AppUpdate } from './app.update';
 import { AppService } from './app.service';
 
@@ -20,10 +19,15 @@ const sessions = new LocalSession({ database: 'session_db.json' });
       token: process.env.TOKEN_TG_BOT,
     }),
     SequelizeModule.forRoot({
-      dialect: 'sqlite',
-      storage: path.resolve(__dirname, '..', 'db', 'tp.db'),
+      dialect: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: Number(process.env.POSTGRES_PORT),
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
       autoLoadModels: true,
       synchronize: true,
+      sync: { alter: true },
       models: [Substation],
     }),
     SequelizeModule.forFeature([Substation]),

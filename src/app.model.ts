@@ -14,7 +14,7 @@ export class Substation extends Model<Substation, SubstationAttrs> {
     primaryKey: true,
   })
   id: number;
-  @Column({ type: DataType.TEXT })
+  @Column({ type: DataType.TEXT, unique: true })
   name: string;
   @Column({ type: DataType.TEXT })
   coordinates: string;

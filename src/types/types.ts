@@ -6,19 +6,13 @@ export enum typeHadlersSubstation {
   CREATE = 'Добвить ТП',
 }
 
-export enum createSubstationModeValue {
+export enum substationModeValue {
   NAME = 'name',
   COORDINATES = 'coordinates',
   DEFAULT = 'default',
 }
 
-export type createSubstationMode =
-  | createSubstationModeValue.NAME
-  | createSubstationModeValue.COORDINATES
-  | createSubstationModeValue.DEFAULT;
-
-export interface createSubstationSchema {
-  name?: string;
-  coordinates?: string;
-  type?: createSubstationMode;
-}
+export type substationMode =
+  | substationModeValue.NAME
+  | substationModeValue.COORDINATES
+  | substationModeValue.DEFAULT;
