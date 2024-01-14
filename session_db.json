@@ -1,24 +1,3 @@
 {
-  "sessions": [
-    {
-      "id": "698484110:698484110",
-      "data": {
-        "__scenes": {},
-        "type": "default",
-        "substationType": "default",
-        "substationName": "888",
-        "substationCoordinates": "56.705450, 60.552370"
-      }
-    },
-    {
-      "id": "1495159051:1495159051",
-      "data": {
-        "__scenes": {},
-        "type": "Поиск ТП",
-        "substationType": "default",
-        "substationName": "444, 444",
-        "substationCoordinates": "444, 444"
-      }
-    }
-  ]
+  "sessions": []
 }

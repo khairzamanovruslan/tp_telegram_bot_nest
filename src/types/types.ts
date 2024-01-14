@@ -4,6 +4,7 @@ export enum typeHadlersSubstation {
   SEARCH = 'Поиск ТП',
   DELETE = 'Удалить ТП',
   CREATE = 'Добвить ТП',
+  UPDATE_PASSWORD_FOR_DELETE = 'Изменение пароля',
 }
 
 export enum substationModeValue {

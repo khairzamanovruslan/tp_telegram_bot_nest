@@ -8,5 +8,8 @@ export interface Context extends ContextTelegraf {
     substationCoordinates?: string;
     substationLink?: string;
     substationType: substationMode;
+    passwordForDelete: boolean;
+    newPassword: boolean;
+    oldPasswordValue: string;
   };
 }

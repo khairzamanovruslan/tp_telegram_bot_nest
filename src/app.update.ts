@@ -7,6 +7,7 @@ import {
   On,
   Start,
   Update,
+  Command,
 } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
 import { actionButtons } from './app.buttons';
@@ -20,6 +21,14 @@ export class AppUpdate {
     @InjectBot() private readonly bot: Telegraf<Context>,
     private readonly appService: AppService,
   ) {}
+
+  @Command('update_password')
+  async test(ctx: Context) {
+    ctx.session.type = typeHadlersSubstation.UPDATE_PASSWORD_FOR_DELETE;
+    ctx.session.oldPasswordValue = '';
+    ctx.session.newPassword = false;
+    await ctx.reply(`Изменение пароля\nВведите старый пароль:`);
+  }
 
   @Start()
   async startCommand(ctx: Context) {
@@ -46,8 +55,9 @@ export class AppUpdate {
   @Hears([typeHadlersSubstation.DELETE])
   async deleteTp(ctx: Context) {
     await ctx.deleteMessage();
-    await ctx.reply('Удаление ТП\nВведите id ТП: ');
+    await ctx.reply('Удаление ТП\nВведите пароль: ');
     ctx.session.type = typeHadlersSubstation.DELETE;
+    ctx.session.passwordForDelete = false;
   }
 
   @Hears([typeHadlersSubstation.CREATE])
@@ -80,33 +90,46 @@ export class AppUpdate {
     }
 
     if (ctx.session.type === typeHadlersSubstation.DELETE) {
-      const isNumber = /^\d+$/.test(message);
-      if (!isNumber) {
-        console.log('Не найдено');
+      if (ctx.session.passwordForDelete) {
+        const isNumber = /^\d+$/.test(message);
+        if (!isNumber) {
+          await ctx.deleteMessage();
+          await ctx.reply(
+            `Удаление ТП\nОшибка!\n${message} - не является id!\nВведите id ТП:`,
+          );
+          return;
+        }
+        const data = await this.appService.deleteTp(Number(message));
+        if (!data) {
+          await ctx.deleteMessage();
+          await ctx.reply(
+            `Удаление ТП\nВнимание!\n${message} - такого id не существует!\nВведите id ТП:`,
+          );
+          return;
+        }
         await ctx.deleteMessage();
-        await ctx.reply(
-          `Удаление ТП\nОшибка!\n${message} - не является id!\nВведите id ТП:`,
-        );
+        await ctx.reply(`Удаление ТП\n\nДанные удалены!`);
+        ctx.session.type = typeHadlersSubstation.DEFAULT;
+        ctx.session.passwordForDelete = false;
         return;
       }
-      const data = await this.appService.deleteTp(Number(message));
-      if (!data) {
+      const passwordValue = await this.appService.getPasswordForDelete(message);
+      const passDB = passwordValue?.passwordValue;
+      if (passDB !== message) {
         await ctx.deleteMessage();
         await ctx.reply(
-          `Удаление ТП\nВнимание!\n${message} - такого id не существует!\nВведите id ТП:`,
+          `Удаление ТП\nВнимание!\nПароль не верный!\nВведите пароль:`,
         );
         return;
+      } else {
+        await ctx.reply(`Удаление ТП\nВерный пароль!\nВведите id ТП:`);
+        ctx.session.passwordForDelete = true;
       }
-      await ctx.deleteMessage();
-      await ctx.reply(`Удаление ТП\n\nДанные удалены!`);
-      ctx.session.type = typeHadlersSubstation.DEFAULT;
-      return;
     }
 
     if (ctx.session.type === typeHadlersSubstation.CREATE) {
       const data = await this.appService.searchByName(message);
       if (data.length > 0) {
-        console.log('searchByName', data);
         await ctx.reply(
           `Добавить ТП\nВнимание!\nНомер ТП: ${ctx.session.substationName} - уже существует!\nВведите уникальный номер ТП: `,
         );
@@ -139,6 +162,34 @@ export class AppUpdate {
           `Добавить ТП\nДанные записаны!\n\nНомер ТП: ${data.name}\nКоординаты ТП: ${data.coordinates}`,
         );
         return;
+      }
+    }
+
+    if (ctx.session.type === typeHadlersSubstation.UPDATE_PASSWORD_FOR_DELETE) {
+      if (ctx.session.newPassword) {
+        const oldPasswordValue = ctx.session.oldPasswordValue;
+        const newPassword = message;
+        await this.appService.updatePassword(oldPasswordValue, newPassword);
+        await ctx.reply(`Изменение пароля\n\nПароль измененен!`);
+        ctx.session.type = typeHadlersSubstation.DEFAULT;
+        ctx.session.oldPasswordValue = '';
+        ctx.session.newPassword = false;
+        return;
+      }
+      const passwordValue = await this.appService.getPasswordForDelete(message);
+      const passDB = passwordValue?.passwordValue;
+      if (passDB !== message) {
+        await ctx.deleteMessage();
+        await ctx.reply(
+          `Изменение пароля\nВнимание!\nПароль не верный!\nВведите пароль:`,
+        );
+        return;
+      } else {
+        await ctx.reply(
+          `Изменение пароля\nОтлично, Вы ввели верный пароль!\nВведите новый пароль:`,
+        );
+        ctx.session.oldPasswordValue = message;
+        ctx.session.newPassword = true;
       }
     }
   }
