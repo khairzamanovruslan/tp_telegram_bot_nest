@@ -23,11 +23,18 @@ export class AppUpdate {
   ) {}
 
   @Command('update_password')
-  async test(ctx: Context) {
+  async updatePassword(ctx: Context) {
     ctx.session.type = typeHadlersSubstation.UPDATE_PASSWORD_FOR_DELETE;
     ctx.session.oldPasswordValue = '';
     ctx.session.newPassword = false;
     await ctx.reply(`Изменение пароля\nВведите старый пароль:`);
+  }
+
+  @Command('admin_new_password')
+  async adminNewPassword(ctx: Context) {
+    await this.appService.clearPassword();
+    await this.appService.createDefaultPassword();
+    await ctx.reply(`+`);
   }
 
   @Start()

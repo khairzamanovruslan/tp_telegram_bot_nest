@@ -42,4 +42,12 @@ export class AppService {
       { where: { passwordValue: oldPasswordValue } },
     );
   }
+  async clearPassword() {
+    return this.settingsRepository.destroy({
+      truncate: true,
+    });
+  }
+  async createDefaultPassword() {
+    return this.settingsRepository.create({ passwordValue: 'qwerty123' });
+  }
 }
