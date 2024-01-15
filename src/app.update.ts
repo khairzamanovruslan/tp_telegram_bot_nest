@@ -27,7 +27,7 @@ export class AppUpdate {
     ctx.session.type = typeHadlersSubstation.UPDATE_PASSWORD_FOR_DELETE;
     ctx.session.oldPasswordValue = '';
     ctx.session.newPassword = false;
-    await ctx.reply(`Изменение пароля\nВведите старый пароль:`);
+    await ctx.reply(`Введите старый пароль:`);
   }
 
   @Command('admin_new_password')
@@ -48,21 +48,21 @@ export class AppUpdate {
     await ctx.deleteMessage();
     ctx.session.type = typeHadlersSubstation.DEFAULT;
     const data = await this.appService.getAll();
-    const resultList = `Список ТП:\n${list(data)}`;
+    const resultList = `Список ТП:\n${list(data)}Всего: ${data.length}`;
     await ctx.reply(data.length ? resultList : 'Список пуст!');
   }
 
   @Hears([typeHadlersSubstation.SEARCH])
   async searchTp(ctx: Context) {
     await ctx.deleteMessage();
-    await ctx.reply('Поиск ТП\nВведите номер ТП: ');
+    await ctx.reply('Для поиска, введите номер ТП: ');
     ctx.session.type = typeHadlersSubstation.SEARCH;
   }
 
   @Hears([typeHadlersSubstation.DELETE])
   async deleteTp(ctx: Context) {
     await ctx.deleteMessage();
-    await ctx.reply('Удаление ТП\nВведите пароль: ');
+    await ctx.reply('Для удаления, введите пароль: ');
     ctx.session.type = typeHadlersSubstation.DELETE;
     ctx.session.passwordForDelete = false;
   }
@@ -70,7 +70,7 @@ export class AppUpdate {
   @Hears([typeHadlersSubstation.CREATE])
   async createTp(ctx: Context) {
     await ctx.deleteMessage();
-    await ctx.reply('Добавить ТП\nВведите номер ТП: ');
+    await ctx.reply('Для добавления, введите номер ТП: ');
     ctx.session.type = typeHadlersSubstation.CREATE;
     ctx.session.substationType = substationModeValue.NAME;
     ctx.session.substationName = '';
@@ -79,16 +79,11 @@ export class AppUpdate {
 
   @On('text')
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
-    console.log(`session: ${ctx.session.type}`);
-    await ctx.reply(`session: ${ctx.session.type}`);
     if (!ctx.session.type) return;
     if (ctx.session.type === typeHadlersSubstation.SEARCH) {
       const data = await this.appService.searchByName(message);
       if (!data.length) {
-        await ctx.deleteMessage();
-        await ctx.reply(
-          `Поиск ТП\nПо запросу: ${message} \nНе найдено!\nВведите номер ТП: `,
-        );
+        await ctx.reply(`Не найдено!\nДля поиска, введите номер ТП:`);
         return;
       }
       await ctx.reply(data[0].coordinates);
@@ -102,7 +97,7 @@ export class AppUpdate {
         if (!isNumber) {
           await ctx.deleteMessage();
           await ctx.reply(
-            `Удаление ТП\nОшибка!\n${message} - не является id!\nВведите id ТП:`,
+            `${message} - не является id!\nДля удаления, введите id ТП:`,
           );
           return;
         }
@@ -110,12 +105,11 @@ export class AppUpdate {
         if (!data) {
           await ctx.deleteMessage();
           await ctx.reply(
-            `Удаление ТП\nВнимание!\n${message} - такого id не существует!\nВведите id ТП:`,
+            `${message} - такого id не существует!\nДля удаления, введите id ТП:`,
           );
           return;
         }
-        await ctx.deleteMessage();
-        await ctx.reply(`Удаление ТП\n\nДанные удалены!`);
+        await ctx.reply(`Данные удалены!`);
         ctx.session.type = typeHadlersSubstation.DEFAULT;
         ctx.session.passwordForDelete = false;
         return;
@@ -124,21 +118,21 @@ export class AppUpdate {
       const passDB = passwordValue?.passwordValue;
       if (passDB !== message) {
         await ctx.deleteMessage();
-        await ctx.reply(
-          `Удаление ТП\nВнимание!\nПароль не верный!\nВведите пароль:`,
-        );
+        await ctx.reply(`Не верный пароль!\nВведите пароль:`);
         return;
       } else {
-        await ctx.reply(`Удаление ТП\nВерный пароль!\nВведите id ТП:`);
+        await ctx.deleteMessage();
+        await ctx.reply(`Введите id ТП:`);
         ctx.session.passwordForDelete = true;
       }
     }
 
     if (ctx.session.type === typeHadlersSubstation.CREATE) {
+      ctx.session.substationName = message;
       const data = await this.appService.searchByName(message);
       if (data.length > 0) {
         await ctx.reply(
-          `Добавить ТП\nВнимание!\nНомер ТП: ${ctx.session.substationName} - уже существует!\nВведите уникальный номер ТП: `,
+          `${ctx.session.substationName} - уже существует!\nДля добавления, введите уникальный номер ТП: `,
         );
         return;
       }
@@ -149,7 +143,7 @@ export class AppUpdate {
         ctx.session.substationName = message;
         ctx.session.substationType = substationModeValue.COORDINATES;
         await ctx.reply(
-          `Добавить ТП\nНомер ТП: ${ctx.session.substationName}\nВведите координаты ТП:`,
+          `Номер ТП: ${ctx.session.substationName}\nВведите координаты ТП:`,
         );
         return;
       }
@@ -166,7 +160,7 @@ export class AppUpdate {
         ctx.session.substationType = substationModeValue.DEFAULT;
         ctx.session.type = typeHadlersSubstation.DEFAULT;
         await ctx.reply(
-          `Добавить ТП\nДанные записаны!\n\nНомер ТП: ${data.name}\nКоординаты ТП: ${data.coordinates}`,
+          `Данные записаны!\n\nНомер ТП: ${data.name}\nКоординаты ТП: ${data.coordinates}`,
         );
         return;
       }
@@ -177,7 +171,8 @@ export class AppUpdate {
         const oldPasswordValue = ctx.session.oldPasswordValue;
         const newPassword = message;
         await this.appService.updatePassword(oldPasswordValue, newPassword);
-        await ctx.reply(`Изменение пароля\n\nПароль измененен!`);
+        await ctx.deleteMessage();
+        await ctx.reply(`Пароль измененен!`);
         ctx.session.type = typeHadlersSubstation.DEFAULT;
         ctx.session.oldPasswordValue = '';
         ctx.session.newPassword = false;
@@ -187,14 +182,11 @@ export class AppUpdate {
       const passDB = passwordValue?.passwordValue;
       if (passDB !== message) {
         await ctx.deleteMessage();
-        await ctx.reply(
-          `Изменение пароля\nВнимание!\nПароль не верный!\nВведите пароль:`,
-        );
+        await ctx.reply(`Не верный пароль!\nВведите пароль:`);
         return;
       } else {
-        await ctx.reply(
-          `Изменение пароля\nОтлично, Вы ввели верный пароль!\nВведите новый пароль:`,
-        );
+        await ctx.deleteMessage();
+        await ctx.reply(`Введите новый пароль:`);
         ctx.session.oldPasswordValue = message;
         ctx.session.newPassword = true;
       }
