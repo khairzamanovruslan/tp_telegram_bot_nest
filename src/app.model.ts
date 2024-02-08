@@ -14,8 +14,16 @@ export class Substation extends Model<Substation, SubstationAttrs> {
     primaryKey: true,
   })
   id: number;
-  @Column({ type: DataType.TEXT, unique: true })
-  name: string;
   @Column({ type: DataType.TEXT })
-  coordinates: string;
+  fullName: string;
+  @Column({ type: DataType.STRING })
+  name: string;
+  @Column({ type: DataType.STRING })
+  coordinateFirst: string;
+  @Column({ type: DataType.STRING })
+  coordinateSecond: string;
+  @Column({ type: DataType.STRING })
+  coordinateFull: string;
+  @Column({ type: DataType.STRING })
+  link: string;
 }

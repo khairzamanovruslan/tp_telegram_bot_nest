@@ -1,6 +1,5 @@
 interface substationUtilsResult {
   list: (tps) => string;
-  coordinates: (tps) => [];
 }
 
 export function substationUtils(): substationUtilsResult {
@@ -8,14 +7,10 @@ export function substationUtils(): substationUtilsResult {
     return tps
       .map(
         (tp) =>
-          `id: ${tp.id} \nТП: ${tp.name}\nКоординаты: ${tp.coordinates}\n\n`,
+          `id: ${tp.id} \nТП: ${tp.fullName}\nНомер: ${tp.name}\nКоординаты: ${tp.coordinateFull}\nСсылка: ${tp.link}\n\n`,
       )
       .join('');
   };
 
-  const coordinates = (tps) => {
-    return tps.map((tp) => tp.coordinates);
-  };
-
-  return { list, coordinates };
+  return { list };
 }

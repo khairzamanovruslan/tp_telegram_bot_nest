@@ -6,7 +6,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Substation } from './app.model';
 import { AppUpdate } from './app.update';
 import { AppService } from './app.service';
-import { Settings } from './models/settings/settings.model';
 
 const sessions = new LocalSession({ database: 'session_db.json' });
 
@@ -29,9 +28,9 @@ const sessions = new LocalSession({ database: 'session_db.json' });
       autoLoadModels: true,
       synchronize: true,
       sync: { alter: true },
-      models: [Substation, Settings],
+      models: [Substation],
     }),
-    SequelizeModule.forFeature([Substation, Settings]),
+    SequelizeModule.forFeature([Substation]),
   ],
   providers: [AppService, AppUpdate],
 })
