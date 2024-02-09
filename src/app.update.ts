@@ -9,10 +9,8 @@ import {
   Update,
 } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { actionButtons } from './app.buttons';
 import { mainEvents } from './types/types';
 import { Context } from './context/context.interface';
-import { substationUtils } from './app.utils';
 
 @Update()
 export class AppUpdate {
@@ -23,19 +21,9 @@ export class AppUpdate {
   @Start()
   async startCommand(ctx: Context) {
     ctx.session.type = mainEvents.SEARCH;
-    await ctx.reply('Для поиска ТП, введите номер:', actionButtons());
-  }
-
-  @Hears([mainEvents.LIST])
-  async listTp(ctx: Context) {
-    const { list } = substationUtils();
-    await ctx.deleteMessage();
-    ctx.session.type = mainEvents.SEARCH;
-    const data = await this.appService.getAll();
-    const resultList = `Список ТП:\n\n${list(data)}Всего: ${data.length}`;
-    await ctx.reply(data.length ? resultList : 'Список пуст!');
     await ctx.reply('Для поиска ТП, введите номер:');
   }
+
   @On('text')
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
     if (!ctx.session.type) return;
