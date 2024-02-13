@@ -1,12 +1,12 @@
 import { AppService } from './app.service';
 import {
   Ctx,
-  Hears,
   InjectBot,
   Message,
   On,
   Start,
   Update,
+  Command,
 } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
 import { mainEvents } from './types/types';
@@ -22,6 +22,17 @@ export class AppUpdate {
   async startCommand(ctx: Context) {
     ctx.session.type = mainEvents.SEARCH;
     await ctx.reply('Для поиска ТП, введите номер:');
+  }
+  @Command('log')
+  async log(@Ctx() ctx: Context) {
+    const { count, rows } = await this.appService.getLog();
+    const listItemsName = rows.map((item) => item.name);
+    const listItemsNameStr = listItemsName.join(', ');
+    await ctx.reply(
+      `Отчет\n\nВсего: ${count} шт. \n\nСписок ТП:\n${listItemsNameStr}`,
+    );
+    await ctx.reply('Для поиска ТП, введите номер:');
+    return;
   }
 
   @On('text')

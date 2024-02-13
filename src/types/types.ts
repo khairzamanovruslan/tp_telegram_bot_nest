@@ -1,4 +1,4 @@
 export enum mainEvents {
-  LIST = 'Список ТП',
+  LOG = 'log',
   SEARCH = 'Поиск ТП',
 }

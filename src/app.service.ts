@@ -14,7 +14,9 @@ export class AppService {
       where: { name: { [Op.eq]: propName } },
     });
   }
-  async getAll() {
-    return this.substationRepository.findAll();
+  async getLog() {
+    return this.substationRepository.findAndCountAll({
+      attributes: ['name'],
+    });
   }
 }
