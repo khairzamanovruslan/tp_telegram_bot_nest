@@ -20,11 +20,23 @@ export class AppUpdate {
   ) {}
   @Start()
   async startCommand(ctx: Context) {
+    const id_tg = String(ctx.update['message']['from']['id']);
+    const dataUser = await this.appService.searchUserToIdTg(id_tg);
+    if (!dataUser.count) {
+      await ctx.reply('Вам отказано в доступе!');
+      return;
+    }
     ctx.session.type = mainEvents.SEARCH;
     await ctx.reply('Для поиска ТП, введите номер:');
   }
   @Command('log')
   async log(@Ctx() ctx: Context) {
+    const id_tg = String(ctx.update['message']['from']['id']);
+    const dataUser = await this.appService.searchUserToIdTg(id_tg);
+    if (!dataUser.count) {
+      await ctx.reply('Вам отказано в доступе!');
+      return;
+    }
     const { count, rows } = await this.appService.getLog();
     const listItemsName = rows.map((item) => item.name);
     const listItemsNameStr = listItemsName.join(', ');
@@ -34,9 +46,30 @@ export class AppUpdate {
     await ctx.reply('Для поиска ТП, введите номер:');
     return;
   }
+  @Command('add_user')
+  async addUser(@Ctx() ctx: Context) {
+    const id_tg = String(ctx.update['message']['from']['id']);
+    const dataUser = await this.appService.searchUserToIdTg(id_tg);
+    if (!dataUser.count) {
+      await ctx.reply('Вам отказано в доступе!');
+      return;
+    }
+    ctx.session.type = mainEvents.ADD_USER;
+    console.log(ctx.session.type);
+    await ctx.reply(
+      'Введите id пользоватателя:\n\nДля этого пользователь должен:\n1. Перейти в бота https://t.me/userinfobot\n2. Нажать кнопку старт\n3. Отправить вам Id',
+    );
+    return;
+  }
 
   @On('text')
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
+    const id_tg = String(ctx.update['message']['from']['id']);
+    const dataUser = await this.appService.searchUserToIdTg(id_tg);
+    if (!dataUser.count) {
+      await ctx.reply('Вам отказано в доступе!');
+      return;
+    }
     if (!ctx.session.type) return;
     if (ctx.session.type === mainEvents.SEARCH) {
       const data = await this.appService.searchByName(message);
@@ -49,6 +82,22 @@ export class AppUpdate {
       await ctx.reply('Для поиска ТП, введите номер:');
       ctx.session.type = mainEvents.SEARCH;
       return;
+    }
+    if (ctx.session.type === mainEvents.ADD_USER) {
+      try {
+        await this.appService.createUserToIdTg(message);
+        await ctx.reply(
+          'Отлично, пользователь добавлен!\nТеперь у него есть доступ к ТП.',
+        );
+        await ctx.reply('Для поиска ТП, введите номер:');
+        ctx.session.type = mainEvents.SEARCH;
+        return;
+      } catch (e) {
+        await ctx.reply(
+          'Ошибка!\nВ БД с таким id уже есть пользователь!\nНажмите /start - для обычной работы с ботом',
+        );
+        await ctx.reply('Введите другое "Имя пользователя": ');
+      }
     }
   }
 }

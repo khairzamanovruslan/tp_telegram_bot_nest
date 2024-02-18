@@ -3,7 +3,7 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import * as LocalSession from 'telegraf-session-local';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Substation } from './app.model';
+import { Substation, Users } from './app.model';
 import { AppUpdate } from './app.update';
 import { AppService } from './app.service';
 
@@ -28,9 +28,9 @@ const sessions = new LocalSession({ database: 'session_db.json' });
       autoLoadModels: true,
       synchronize: true,
       sync: { alter: true },
-      models: [Substation],
+      models: [Substation, Users],
     }),
-    SequelizeModule.forFeature([Substation]),
+    SequelizeModule.forFeature([Substation, Users]),
   ],
   providers: [AppService, AppUpdate],
 })
