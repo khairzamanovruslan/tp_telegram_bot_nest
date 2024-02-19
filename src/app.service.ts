@@ -15,8 +15,9 @@ export class AppService {
       where: { name: { [Op.eq]: propName } },
     });
   }
-  async getLog() {
+  async getLogListTp() {
     return this.substationRepository.findAndCountAll({
+      order: [['name', 'ASC']],
       attributes: ['name'],
     });
   }

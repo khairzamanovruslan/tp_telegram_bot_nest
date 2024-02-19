@@ -29,7 +29,7 @@ export class AppUpdate {
     ctx.session.type = mainEvents.SEARCH;
     await ctx.reply('Для поиска ТП, введите номер:');
   }
-  @Command('log')
+  @Command('log_tp')
   async log(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
@@ -37,7 +37,7 @@ export class AppUpdate {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
-    const { count, rows } = await this.appService.getLog();
+    const { count, rows } = await this.appService.getLogListTp();
     const listItemsName = rows.map((item) => item.name);
     const listItemsNameStr = listItemsName.join(', ');
     await ctx.reply(
