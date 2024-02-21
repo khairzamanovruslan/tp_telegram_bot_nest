@@ -43,6 +43,7 @@ export class AppUpdate {
     await ctx.reply(
       `Отчет\n\nВсего: ${count} шт. \n\nСписок ТП:\n${listItemsNameStr}`,
     );
+    ctx.session.type = mainEvents.SEARCH;
     await ctx.reply('Для поиска ТП, введите номер:');
     return;
   }
@@ -67,6 +68,7 @@ export class AppUpdate {
     await ctx.reply(
       `Отчет_пользователи\n\nВсего: ${count} шт. \n\nСписок:\n${resultListUsers}`,
     );
+    ctx.session.type = mainEvents.SEARCH;
     await ctx.reply('Для поиска ТП, введите номер:');
     return;
   }
