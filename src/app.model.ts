@@ -39,4 +39,8 @@ export class Users extends Model<Users, UsersAttrs> {
   id_tg: string;
   @Column({ type: DataType.TEXT, unique: true })
   username_tg: string;
+  @Column({ type: DataType.TEXT })
+  first_name_tg: string;
+  @Column({ type: DataType.TEXT })
+  last_name_tg: string;
 }

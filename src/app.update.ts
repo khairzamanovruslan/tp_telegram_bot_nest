@@ -46,6 +46,30 @@ export class AppUpdate {
     await ctx.reply('Для поиска ТП, введите номер:');
     return;
   }
+  @Command('log_users')
+  async logUsers(@Ctx() ctx: Context) {
+    const id_tg = String(ctx.update['message']['from']['id']);
+    const dataUser = await this.appService.searchUserToIdTg(id_tg);
+    if (!dataUser.count) {
+      await ctx.reply('Вам отказано в доступе!');
+      return;
+    }
+    const { count, rows } = await this.appService.getLogListUsers();
+    const listUsers = rows.map(
+      (item, index) =>
+        `№ п.п: ${index + 1}\nid_tg: ${item.id_tg}\nusername: ${
+          item.username_tg || '-'
+        }\nfirst_name: ${item.first_name_tg || '-'}\nlast_name: ${
+          item.last_name_tg || '-'
+        }\n\n`,
+    );
+    const resultListUsers = listUsers.join('');
+    await ctx.reply(
+      `Отчет_пользователи\n\nВсего: ${count} шт. \n\nСписок:\n${resultListUsers}`,
+    );
+    await ctx.reply('Для поиска ТП, введите номер:');
+    return;
+  }
   @Command('add_user')
   async addUser(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
@@ -65,11 +89,20 @@ export class AppUpdate {
   @On('text')
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
+    const first_name = String(ctx.update['message']['from']['first_name']);
+    const last_name = String(ctx.update['message']['from']['last_name']);
+    const username = String(ctx.update['message']['from']['username']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
     if (!dataUser.count) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
+    await this.appService.updateUserToIdTg(
+      id_tg,
+      first_name,
+      username,
+      last_name,
+    );
     if (!ctx.session.type) return;
     if (ctx.session.type === mainEvents.SEARCH) {
       const data = await this.appService.searchByName(message);
