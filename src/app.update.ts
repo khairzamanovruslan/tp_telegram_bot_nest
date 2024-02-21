@@ -77,8 +77,14 @@ export class AppUpdate {
         await ctx.reply(`Не найдено!\nДля поиска, введите номер ТП:`);
         return;
       }
-      await ctx.reply(data[0].coordinateFull || 'Координата не добавлена!');
-      await ctx.reply(data[0].link || 'Ссылка не добавлена!');
+      const latitude = data[0].latitude;
+      const longitude = data[0].longitude;
+      if (!latitude) {
+        await ctx.reply('Координата не обнаружена!');
+      }
+      const linkForUser = `https://yandex.ru/maps/?pt=${longitude},${latitude}&z=18&l=map`;
+      await ctx.reply(`${latitude},${longitude}`);
+      await ctx.reply(linkForUser);
       await ctx.reply('Для поиска ТП, введите номер:');
       ctx.session.type = mainEvents.SEARCH;
       return;
