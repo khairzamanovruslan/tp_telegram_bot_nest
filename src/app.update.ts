@@ -11,6 +11,7 @@ import {
 import { Telegraf } from 'telegraf';
 import { mainEvents } from './types/types';
 import { Context } from './context/context.interface';
+import { countOccurrences } from './utils/checking-string-for-char';
 
 @Update()
 export class AppUpdate {
@@ -27,6 +28,7 @@ export class AppUpdate {
       return;
     }
     ctx.session.type = mainEvents.SEARCH;
+    ctx.session.add_tp_name_value = '';
     await ctx.reply('Для поиска ТП, введите номер:');
   }
   @Command('log_tp')
@@ -88,6 +90,20 @@ export class AppUpdate {
     return;
   }
 
+  @Command('add_tp')
+  async addTp(@Ctx() ctx: Context) {
+    const id_tg = String(ctx.update['message']['from']['id']);
+    const dataUser = await this.appService.searchUserToIdTg(id_tg);
+    if (!dataUser.count) {
+      await ctx.reply('Вам отказано в доступе!');
+      return;
+    }
+    ctx.session.type = mainEvents.ADD_TP_NAME;
+    ctx.session.add_tp_name_value = '';
+    await ctx.reply('Введите номер ТП:');
+    return;
+  }
+
   @On('text')
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
@@ -139,6 +155,55 @@ export class AppUpdate {
         );
         await ctx.reply('Введите другое "Имя пользователя": ');
       }
+    }
+    if (ctx.session.type === mainEvents.ADD_TP_NAME) {
+      const data = await this.appService.searchByName(message);
+      if (data.length) {
+        await ctx.reply(
+          `Извините, ТП с таким номером уже существует.\nПожалуйста попробуйте другой номер:`,
+        );
+        ctx.session.add_tp_name_value = '';
+        return;
+      }
+      await ctx.reply(
+        'Хорошо.\nФормат координат: 57.042185,60.504975\nТеперь введите координаты ТП:',
+      );
+      ctx.session.add_tp_name_value = message;
+      ctx.session.type = mainEvents.ADD_TP_COORDINATES;
+      return;
+    }
+    if (ctx.session.type === mainEvents.ADD_TP_COORDINATES) {
+      const messagePrepear = message.replaceAll(' ', '');
+      const lengthComma = countOccurrences(messagePrepear, ',');
+      if (lengthComma !== 1) {
+        await ctx.reply(
+          'Ошибка!\nОбратите внимание на запятые, н-р:57.042185,60.504975\nВведите координаты ТП:',
+        );
+        return;
+      }
+      const latitude = messagePrepear.split(',')[0];
+      const longitude = messagePrepear.split(',')[1];
+      const latitudePoint = countOccurrences(latitude, '.');
+      const longitudePoint = countOccurrences(longitude, '.');
+      if (latitudePoint !== 1 || longitudePoint !== 1) {
+        await ctx.reply(
+          'Ошибка!\nОбратите внимание на точки, н-р:57.042185,60.504975\nВведите координаты ТП:',
+        );
+        return;
+      }
+      const data = await this.appService.createTp(
+        ctx.session.add_tp_name_value,
+        latitude,
+        longitude,
+      );
+      const dataRes = data.dataValues;
+      await ctx.reply(
+        `Отлично! Новая ТП добавлена в базу.\nНомер: ${dataRes.name}\nКоординаты: ${dataRes.latitude},${dataRes.longitude}`,
+      );
+      ctx.session.type = mainEvents.SEARCH;
+      ctx.session.add_tp_name_value = '';
+      await ctx.reply('Для поиска ТП, введите номер:');
+      return;
     }
   }
 }

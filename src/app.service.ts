@@ -15,6 +15,19 @@ export class AppService {
       where: { name: { [Op.eq]: propName } },
     });
   }
+  async createTp(name: string, latitude: string, longitude: string) {
+    const lastRecord = await this.substationRepository.findAll({
+      order: [['id', 'DESC']],
+      limit: 1,
+    });
+    const lastRecordId = lastRecord[0].dataValues.id;
+    return this.substationRepository.create({
+      id: lastRecordId + 1,
+      name,
+      latitude,
+      longitude,
+    });
+  }
   async getLogListTp() {
     return this.substationRepository.findAndCountAll({
       order: [['name', 'ASC']],

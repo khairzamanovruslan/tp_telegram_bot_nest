@@ -1,7 +1,10 @@
 import { Model, Table, Column, DataType } from 'sequelize-typescript';
 
 interface SubstationAttrs {
+  readonly id: number;
   readonly name: string;
+  readonly latitude: string;
+  readonly longitude: string;
 }
 
 @Table({ tableName: 'substation' })
