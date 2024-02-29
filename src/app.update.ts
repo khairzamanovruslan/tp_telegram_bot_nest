@@ -9,7 +9,7 @@ import {
   Command,
 } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { mainEvents } from './types/types';
+import { mainEvents, mainCommands } from './types/types';
 import { Context } from './context/context.interface';
 import { countOccurrences } from './utils/checking-string-for-char';
 
@@ -31,7 +31,7 @@ export class AppUpdate {
     ctx.session.add_tp_name_value = '';
     await ctx.reply('Для поиска ТП, введите номер:');
   }
-  @Command('log_tp')
+  @Command(mainCommands.LOG_TP)
   async log(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
@@ -49,7 +49,7 @@ export class AppUpdate {
     await ctx.reply('Для поиска ТП, введите номер:');
     return;
   }
-  @Command('log_users')
+  @Command(mainCommands.LOG_USERS)
   async logUsers(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
@@ -74,7 +74,7 @@ export class AppUpdate {
     await ctx.reply('Для поиска ТП, введите номер:');
     return;
   }
-  @Command('add_user')
+  @Command(mainCommands.ADD_USER)
   async addUser(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
@@ -90,7 +90,7 @@ export class AppUpdate {
     return;
   }
 
-  @Command('add_tp')
+  @Command(mainCommands.ADD_TP)
   async addTp(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
@@ -101,6 +101,19 @@ export class AppUpdate {
     ctx.session.type = mainEvents.ADD_TP_NAME;
     ctx.session.add_tp_name_value = '';
     await ctx.reply('Введите номер ТП:');
+    return;
+  }
+
+  @Command(mainCommands.DELETE_TP)
+  async deleteTp(@Ctx() ctx: Context) {
+    const id_tg = String(ctx.update['message']['from']['id']);
+    const dataUser = await this.appService.searchUserToIdTg(id_tg);
+    if (!dataUser.count) {
+      await ctx.reply('Вам отказано в доступе!');
+      return;
+    }
+    ctx.session.type = mainEvents.DELETE_TP;
+    await ctx.reply('Для удаления введите номер ТП:');
     return;
   }
 
@@ -204,6 +217,19 @@ export class AppUpdate {
       ctx.session.add_tp_name_value = '';
       await ctx.reply('Для поиска ТП, введите номер:');
       return;
+    }
+    if (ctx.session.type === mainEvents.DELETE_TP) {
+      const data = await this.appService.getOneTp(message);
+      if (!data) {
+        await ctx.reply(
+          'Не обнаружена ТП с указанным номером!\nПопробуйте еще раз ввести номер:',
+        );
+        return;
+      }
+      await this.appService.daleteOneTp(message);
+      await ctx.reply('Отлично! ТП удалена.');
+      await ctx.reply('Для поиска ТП, введите номер:');
+      ctx.session.type = mainEvents.SEARCH;
     }
   }
 }

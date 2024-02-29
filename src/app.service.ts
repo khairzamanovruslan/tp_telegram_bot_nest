@@ -34,6 +34,24 @@ export class AppService {
       attributes: ['name'],
     });
   }
+  async getOneTp(name: string) {
+    return this.substationRepository.destroy({
+      where: {
+        name: {
+          [Op.eq]: name,
+        },
+      },
+    });
+  }
+  async daleteOneTp(name: string) {
+    return this.substationRepository.findOne({
+      where: {
+        name: {
+          [Op.eq]: name,
+        },
+      },
+    });
+  }
   async createUserToIdTg(id_tg: string) {
     return this.userRepository.create({ id_tg: id_tg });
   }
