@@ -22,6 +22,7 @@ export class AppUpdate {
   @Start()
   async startCommand(ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
+    console.log('0. startCommand id_tg', id_tg);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
     if (!dataUser.count) {
       await ctx.reply('Вам отказано в доступе!');
@@ -83,7 +84,6 @@ export class AppUpdate {
       return;
     }
     ctx.session.type = mainEvents.ADD_USER;
-    console.log(ctx.session.type);
     await ctx.reply(
       'Введите id пользоватателя:\n\nДля этого пользователь должен:\n1. Перейти в бота https://t.me/userinfobot\n2. Нажать кнопку старт\n3. Отправить вам Id',
     );
@@ -119,11 +119,17 @@ export class AppUpdate {
 
   @On('text')
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
+    console.log('1. message', message);
     const id_tg = String(ctx.update['message']['from']['id']);
     const first_name = String(ctx.update['message']['from']['first_name']);
     const last_name = String(ctx.update['message']['from']['last_name']);
     const username = String(ctx.update['message']['from']['username']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
+    console.log(
+      '2. ctx.update_message_from',
+      ctx.update['message']['from']['id'],
+    );
+    console.log('3. dataUser', dataUser);
     if (!dataUser.count) {
       await ctx.reply('Вам отказано в доступе!');
       return;
@@ -137,6 +143,7 @@ export class AppUpdate {
     if (!ctx.session.type) return;
     if (ctx.session.type === mainEvents.SEARCH) {
       const data = await this.appService.searchByName(message);
+      console.log('4. SEARCH', data);
       if (!data.length) {
         await ctx.reply(`Не найдено!\nДля поиска, введите номер ТП:`);
         return;
@@ -149,6 +156,7 @@ export class AppUpdate {
       const linkForUser = `https://yandex.ru/maps/?pt=${longitude},${latitude}&z=18&l=map`;
       await ctx.reply(`${latitude},${longitude}`);
       await ctx.reply(linkForUser);
+      console.log('5. linkForUser', linkForUser);
       await ctx.reply('Для поиска ТП, введите номер:');
       ctx.session.type = mainEvents.SEARCH;
       return;
