@@ -121,9 +121,9 @@ export class AppUpdate {
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
     console.log('1. message', message);
     const id_tg = String(ctx.update['message']['from']['id']);
-    const first_name = String(ctx.update['message']['from']['first_name']);
+    /*  const first_name = String(ctx.update['message']['from']['first_name']);
     const last_name = String(ctx.update['message']['from']['last_name']);
-    const username = String(ctx.update['message']['from']['username']);
+    const username = String(ctx.update['message']['from']['username']); */
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
     console.log(
       '2. ctx.update_message_from',
@@ -134,12 +134,12 @@ export class AppUpdate {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
-    await this.appService.updateUserToIdTg(
+    /* await this.appService.updateUserToIdTg(
       id_tg,
       first_name,
       username,
       last_name,
-    );
+    ); */
     if (!ctx.session.type) return;
     if (ctx.session.type === mainEvents.SEARCH) {
       const data = await this.appService.searchByName(message);
