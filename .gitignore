@@ -3,6 +3,7 @@
 /node_modules
 .env
 .development
+session_db.json
 
 # Logs
 logs

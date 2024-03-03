@@ -22,7 +22,6 @@ export class AppUpdate {
   @Start()
   async startCommand(ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
-    console.log('0. startCommand id_tg', id_tg);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
     if (!dataUser.count) {
       await ctx.reply('Вам отказано в доступе!');
@@ -31,6 +30,8 @@ export class AppUpdate {
     ctx.session.type = mainEvents.SEARCH;
     ctx.session.add_tp_name_value = '';
     await ctx.reply('Для поиска ТП, введите номер:');
+    const logMessageForAdmin = `+++\nUser id: ${id_tg}\nКоманда: /start\n+++`;
+    await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
   }
   @Command(mainCommands.LOG_TP)
   async log(@Ctx() ctx: Context) {
@@ -48,6 +49,8 @@ export class AppUpdate {
     );
     ctx.session.type = mainEvents.SEARCH;
     await ctx.reply('Для поиска ТП, введите номер:');
+    const logMessageForAdmin = `+++\nUser id: ${id_tg}\nКоманда: /${mainCommands.LOG_TP}\n+++`;
+    await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
     return;
   }
   @Command(mainCommands.LOG_USERS)
@@ -73,6 +76,8 @@ export class AppUpdate {
     );
     ctx.session.type = mainEvents.SEARCH;
     await ctx.reply('Для поиска ТП, введите номер:');
+    const logMessageForAdmin = `+++\nUser id: ${id_tg}\nКоманда: /${mainCommands.LOG_USERS}\n+++`;
+    await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
     return;
   }
   @Command(mainCommands.ADD_USER)
@@ -87,6 +92,8 @@ export class AppUpdate {
     await ctx.reply(
       'Введите id пользоватателя:\n\nДля этого пользователь должен:\n1. Перейти в бота https://t.me/userinfobot\n2. Нажать кнопку старт\n3. Отправить вам Id',
     );
+    const logMessageForAdmin = `+++\nUser id: ${id_tg}\nКоманда: /${mainCommands.ADD_USER}\n+++`;
+    await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
     return;
   }
 
@@ -101,6 +108,8 @@ export class AppUpdate {
     ctx.session.type = mainEvents.ADD_TP_NAME;
     ctx.session.add_tp_name_value = '';
     await ctx.reply('Введите номер ТП:');
+    const logMessageForAdmin = `+++\nUser id: ${id_tg}\nКоманда: /${mainCommands.ADD_TP}\n+++`;
+    await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
     return;
   }
 
@@ -114,30 +123,34 @@ export class AppUpdate {
     }
     ctx.session.type = mainEvents.DELETE_TP;
     await ctx.reply('Для удаления введите номер ТП:');
+    const logMessageForAdmin = `+++\nUser id: ${id_tg}\nКоманда: /${mainCommands.DELETE_TP}\n+++`;
+    await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
     return;
   }
 
   @On('text')
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
-    const first_name = String(
+    const logMessageForAdmin = `User id: ${id_tg}\nИскал: ${message}`;
+    await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
+    /* const first_name = String(
       ctx.update['message']['from']['first_name'] || 'н/д',
     );
     const last_name = String(
       ctx.update['message']['from']['last_name'] || 'н/д',
     );
-    const username = String(ctx.update['message']['from']['username'] || 'н/д');
+    const username = String(ctx.update['message']['from']['username'] || 'н/д'); */
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
     if (!dataUser.count) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
-    await this.appService.updateUserToIdTg(
+    /* await this.appService.updateUserToIdTg(
       id_tg,
       first_name,
       username,
       last_name,
-    );
+    ); */
     if (!ctx.session.type) return;
     if (ctx.session.type === mainEvents.SEARCH) {
       const data = await this.appService.searchByName(message);
