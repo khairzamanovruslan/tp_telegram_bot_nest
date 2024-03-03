@@ -131,26 +131,26 @@ export class AppUpdate {
   @On('text')
   async getTp(@Message('text') message: string, @Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
-    const logMessageForAdmin = `User id: ${id_tg}\nИскал: ${message}`;
+    const logMessageForAdmin = `+++\nUser id: ${id_tg}\nСообщение: ${message}\n+++`;
     await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
-    /* const first_name = String(
+    const first_name = String(
       ctx.update['message']['from']['first_name'] || 'н/д',
     );
     const last_name = String(
       ctx.update['message']['from']['last_name'] || 'н/д',
     );
-    const username = String(ctx.update['message']['from']['username'] || 'н/д'); */
+    const username = String(ctx.update['message']['from']['username'] || 'н/д');
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
     if (!dataUser.count) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
-    /* await this.appService.updateUserToIdTg(
+    await this.appService.updateUserToIdTg(
       id_tg,
       first_name,
       username,
       last_name,
-    ); */
+    );
     if (!ctx.session.type) return;
     if (ctx.session.type === mainEvents.SEARCH) {
       const data = await this.appService.searchByName(message);
