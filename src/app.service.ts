@@ -58,25 +58,6 @@ export class AppService {
   async getLogListUsers() {
     return this.userRepository.findAndCountAll();
   }
-  async updateUserToIdTg(
-    id_tg: string,
-    first_name: string,
-    username: string,
-    last_name: string,
-  ) {
-    return this.userRepository.update(
-      {
-        first_name_tg: first_name,
-        username_tg: username,
-        last_name_tg: last_name,
-      },
-      {
-        where: {
-          id_tg: id_tg,
-        },
-      },
-    );
-  }
   async searchUserToIdTg(id_tg: string) {
     return this.userRepository.findAndCountAll({
       where: {

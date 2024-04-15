@@ -40,10 +40,14 @@ export class Users extends Model<Users, UsersAttrs> {
   id: number;
   @Column({ type: DataType.TEXT, unique: true })
   id_tg: string;
-  @Column({ type: DataType.TEXT, unique: true })
+  @Column({ type: DataType.TEXT })
+  full_name: string;
+  @Column({ type: DataType.BOOLEAN })
+  access_bot: boolean;
+  /* @Column({ type: DataType.TEXT, unique: true })
   username_tg: string;
   @Column({ type: DataType.TEXT })
   first_name_tg: string;
   @Column({ type: DataType.TEXT })
-  last_name_tg: string;
+  last_name_tg: string; */
 }

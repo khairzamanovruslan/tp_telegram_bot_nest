@@ -23,7 +23,7 @@ export class AppUpdate {
   async startCommand(ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
-    if (!dataUser.count) {
+    if (!dataUser.count || !dataUser.rows[0].access_bot) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
@@ -37,7 +37,7 @@ export class AppUpdate {
   async log(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
-    if (!dataUser.count) {
+    if (!dataUser.count || !dataUser.rows[0].access_bot) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
@@ -57,18 +57,16 @@ export class AppUpdate {
   async logUsers(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
-    if (!dataUser.count) {
+    if (!dataUser.count || !dataUser.rows[0].access_bot) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
     const { count, rows } = await this.appService.getLogListUsers();
     const listUsers = rows.map(
       (item, index) =>
-        `№ п.п: ${index + 1}\nid_tg: ${item.id_tg}\nusername: ${
-          item.username_tg || '-'
-        }\nfirst_name: ${item.first_name_tg || '-'}\nlast_name: ${
-          item.last_name_tg || '-'
-        }\n\n`,
+        `№ п.п: ${index + 1}\nid_tg: ${item.id_tg}\nФИО: ${
+          item.full_name || '-'
+        }\nДоступ к боту: ${item.access_bot || '-'}\n\n`,
     );
     const resultListUsers = listUsers.join('');
     await ctx.reply(
@@ -84,7 +82,7 @@ export class AppUpdate {
   async addUser(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
-    if (!dataUser.count) {
+    if (!dataUser.count || !dataUser.rows[0].access_bot) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
@@ -101,7 +99,7 @@ export class AppUpdate {
   async addTp(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
-    if (!dataUser.count) {
+    if (!dataUser.count || !dataUser.rows[0].access_bot) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
@@ -117,7 +115,7 @@ export class AppUpdate {
   async deleteTp(@Ctx() ctx: Context) {
     const id_tg = String(ctx.update['message']['from']['id']);
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
-    if (!dataUser.count) {
+    if (!dataUser.count || !dataUser.rows[0].access_bot) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
@@ -133,24 +131,11 @@ export class AppUpdate {
     const id_tg = String(ctx.update['message']['from']['id']);
     const logMessageForAdmin = `+++\nUser id: ${id_tg}\nСообщение: ${message}\n+++`;
     await ctx.telegram.sendMessage(process.env.ID_ADMIN_TG, logMessageForAdmin);
-    /* const first_name = String(
-      ctx.update['message']['from']['first_name'] || 'н/д',
-    );
-    const last_name = String(
-      ctx.update['message']['from']['last_name'] || 'н/д',
-    );
-    const username = String(ctx.update['message']['from']['username'] || 'н/д'); */
     const dataUser = await this.appService.searchUserToIdTg(id_tg);
-    if (!dataUser.count) {
+    if (!dataUser.count || !dataUser.rows[0].access_bot) {
       await ctx.reply('Вам отказано в доступе!');
       return;
     }
-    /* await this.appService.updateUserToIdTg(
-      id_tg,
-      first_name,
-      username,
-      last_name,
-    ); */
     if (!ctx.session.type) return;
     if (ctx.session.type === mainEvents.SEARCH) {
       const data = await this.appService.searchByName(message);
