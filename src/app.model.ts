@@ -7,7 +7,7 @@ interface SubstationAttrs {
   readonly longitude: string;
 }
 
-@Table({ tableName: 'substation' })
+@Table({ tableName: 'substation', timestamps: false })
 export class Substation extends Model<Substation, SubstationAttrs> {
   @Column({
     type: DataType.INTEGER,
@@ -26,10 +26,9 @@ export class Substation extends Model<Substation, SubstationAttrs> {
 
 interface UsersAttrs {
   readonly id_tg: string;
-  readonly username_tg: string;
 }
 
-@Table({ tableName: 'users' })
+@Table({ tableName: 'users_tg', timestamps: false })
 export class Users extends Model<Users, UsersAttrs> {
   @Column({
     type: DataType.INTEGER,
@@ -44,10 +43,4 @@ export class Users extends Model<Users, UsersAttrs> {
   full_name: string;
   @Column({ type: DataType.BOOLEAN })
   access_bot: boolean;
-  /* @Column({ type: DataType.TEXT, unique: true })
-  username_tg: string;
-  @Column({ type: DataType.TEXT })
-  first_name_tg: string;
-  @Column({ type: DataType.TEXT })
-  last_name_tg: string; */
 }

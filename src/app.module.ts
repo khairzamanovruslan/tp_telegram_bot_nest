@@ -26,8 +26,8 @@ const sessions = new LocalSession({ database: 'session_db.json' });
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       autoLoadModels: true,
-      synchronize: true,
-      sync: { alter: true },
+      /* synchronize: true,
+      sync: { alter: true }, */
       models: [Substation, Users],
     }),
     SequelizeModule.forFeature([Substation, Users]),
