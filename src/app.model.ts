@@ -26,6 +26,7 @@ export class Substation extends Model<Substation, SubstationAttrs> {
 
 interface UsersAttrs {
   readonly id_tg: string;
+  readonly access_bot: boolean;
 }
 
 @Table({ tableName: 'users_tg', timestamps: false })

@@ -53,7 +53,7 @@ export class AppService {
     });
   }
   async createUserToIdTg(id_tg: string) {
-    return this.userRepository.create({ id_tg: id_tg });
+    return this.userRepository.create({ id_tg: id_tg, access_bot: true });
   }
   async getLogListUsers() {
     return this.userRepository.findAndCountAll();
